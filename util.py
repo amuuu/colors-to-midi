@@ -1,3 +1,5 @@
+import numpy as np
+
 max_midi_note = 88 #C8
 min_midi_note = 36 #C2
 
@@ -7,7 +9,7 @@ base_notes_values = {"c": 24, "c#": 25, "d": 26, "d#": 27,
 
 def compute_scale_notes(scale_name, scale_type):
     if scale_name not in base_notes_values:
-        return False
+        return []
 	
     base_note = base_notes_values.get(scale_name)
     notes = []
@@ -22,5 +24,4 @@ def compute_scale_notes(scale_name, scale_type):
             notes.extend([base_note, base_note+2, base_note+3, base_note+5, base_note+7, base_note+8, base_note+10])
             base_note += 12 # go one octave further
 
-    return notes
-
+    return np.asarray(notes)

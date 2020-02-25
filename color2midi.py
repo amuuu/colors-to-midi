@@ -22,16 +22,16 @@ if args['channel'] == 1:
 	channel = 0x90
 
 if args['scale']=='none':
-	pass
+	scale_type = 0 # none
 elif 'M' in args['scale']:
-	scale_type = 1 #major
+	scale_type = 1 # major
 elif 'm' in args['scale']:
-	scale_type = 2 #minor
+	scale_type = 2 # minor
 
 if not args['scale']=='none':
 	scale_name = args['scale'].lower().rsplit('m',1)[0]
 	notes = compute_scale_notes(scale_name, scale_type)
-	if notes == False:
+	if len(notes)==0:
 		print("Not a valid scale")
 		exit()
 	
@@ -70,8 +70,12 @@ while True:
 	colorsum=color_list[0]+color_list[1]+color_list[2]
 	
 	# calculate the midi value
-	unit_size=400/(float)(max_midi_note-min_midi_note)
-	value= (int)(colorsum/unit_size + (max_midi_note-1))
+	if scale_type == 0:
+		unit_size=400/(float)(max_midi_note-min_midi_note)
+		value=(int)(colorsum/unit_size + (max_midi_note-1))
+	else:
+		idx = (np.abs(notes - colorsum)).argmin()
+		value = notes[idx]
 
 	# add info text to the frame
 	text='Dominant color is: bgr({})'.format(centers[0].astype(np.int32))
