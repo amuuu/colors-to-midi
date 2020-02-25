@@ -7,29 +7,44 @@ import cv2
 import os
 import rtmidi
 
-max_midi_note = 88 #C8
-min_midi_note = 36 #C2
+# import local files
+from util import *
 
-major_scale = []
-
+# terminal input arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-c", "--channel", required=False, default=1,
 	help="output midi channel")
-ap.add_argument("-s", "--scale", default='CM', required=False,
-	help="target scale to quantize the midi signals to")
+ap.add_argument("-s", "--scale", default='none', required=False,
+	help="target scale to quantize the midi signals to.")
 args = vars(ap.parse_args())
 
+# set up values based on terminal input args
 if args['channel'] == 1:
 	channel = 0x90
 
+if args['scale']=='none':
+	pass
+elif 'M' in args['scale']:
+	scale_type = 1 #major
+elif 'm' in args['scale']:
+	scale_type = 2 #minor
 
+if not args['scale']=='none':
+	scale_name = args['scale'].lower().rsplit('m',1)[0]
+	if compute_scale_notes(scale_name, scale_type) == False:
+		print("Not a valid scale")
+		return
+
+
+
+# set up the cv to read the webcam
 vs = cv2.VideoCapture(0)
 vs.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 vs.set(cv2.CAP_PROP_FPS, 25)
 
+# set up rtmidi library and ports
 midiout = rtmidi.MidiOut()
 available_ports = midiout.get_ports()
-
 if available_ports:
     midiout.open_port(0)
 else:
