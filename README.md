@@ -8,4 +8,4 @@ You will need a webcam to be captured by the program and a deviced connected via
 python color2midi.py -s C#m -c 1
 ```
 
-`-c` is for midi output channel and `-s` is for the target scale.
+`-c` is for midi output channel and `-s` is for the target scale. It currently has only major and minor scales. Use "M" for major and "m" for minor.
