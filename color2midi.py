@@ -1,13 +1,12 @@
 # import the necessary packages
-import numpy as np
 import argparse
-import imutils
+import os
 import time
 import cv2
-import os
+import imutils
+import numpy as np
 import rtmidi
 
-# import local files
 from util import *
 
 # terminal input arguments
@@ -72,7 +71,7 @@ while True:
 	
 	# calculate the midi value
 	unit_size=400/(float)(max_midi_note-min_midi_note)
-	value= (int)(colorsum/unit_size + (max_midi-1))
+	value= (int)(colorsum/unit_size + (max_midi_note-1))
 
 	# add info text to the frame
 	text='Dominant color is: bgr({})'.format(centers[0].astype(np.int32))
