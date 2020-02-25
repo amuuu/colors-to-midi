@@ -31,11 +31,11 @@ elif 'm' in args['scale']:
 
 if not args['scale']=='none':
 	scale_name = args['scale'].lower().rsplit('m',1)[0]
-	if compute_scale_notes(scale_name, scale_type) == False:
+	notes = compute_scale_notes(scale_name, scale_type)
+	if notes == False:
 		print("Not a valid scale")
-		return
-
-
+		exit()
+	
 
 # set up the cv to read the webcam
 vs = cv2.VideoCapture(0)
