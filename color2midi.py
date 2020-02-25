@@ -46,8 +46,10 @@ while True:
 	flags = cv2.KMEANS_RANDOM_CENTERS
 	compactness,labels,centers = cv2.kmeans(data,1,None,criteria,10,flags)
 
+	
 	color_list=centers[0].astype(np.int32).tolist()
 	colorsum=color_list[0]+color_list[1]+color_list[2]
+	
 	min_midi = 36 #c2
 	max_midi = 88 #c8
 	unit_size=400/(float)(max_midi-min_midi)
@@ -58,6 +60,10 @@ while True:
 
 	text2='MIDI value is: {}'.format(value)
 	cv2.putText(frame, text2, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 10 , 2)
+
+	text3='Target scale is: {}'.format(args['scale'])
+	cv2.putText(frame, text3, (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 10 , 2)
+
 
 	with midiout:
 		note_on = [0x90, value, 112] # channel 1, middle C, velocity 112
