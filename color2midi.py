@@ -7,6 +7,16 @@ import cv2
 import os
 import rtmidi
 
+ap = argparse.ArgumentParser()
+ap.add_argument("-c", "--midi-channel", required=False, default=1,
+	help="output midi channel")
+ap.add_argument("-s", "--scale", default='CM', required=False,
+	help="target scale to quantize the midi signals to")
+args = vars(ap.parse_args())
+
+if args['midi-channel'] == 1:
+	channel = 0x90
+
 
 vs = cv2.VideoCapture(0)
 vs.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -30,7 +40,6 @@ while True:
 		break
 
 	data = np.reshape(frame, (-1,3))
-	# print(data.shape)
 	data = np.float32(data)
 
 	criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
