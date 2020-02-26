@@ -12,6 +12,8 @@ import multiprocessing
 from util import *
 from signalthread import *
 
+count = 0
+
 # terminal input arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-c", "--channel", required=False, default=1,
@@ -55,62 +57,53 @@ else:
 
 
 # loop over frames from the webcam stream
-while True:
-	
-	# grab a frame from webcam
-	(grabbed, frame) = vs.read()
-	if not grabbed:
-		break
+with midiout:
+	while True:
+		
+		# grab a frame from webcam
+		(grabbed, frame) = vs.read()
+		if not grabbed:
+			break
 
-	# find the most dominant color in the frame
-	data = np.reshape(frame, (-1,3))
-	data = np.float32(data)
-	criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-	flags = cv2.KMEANS_RANDOM_CENTERS
-	compactness,labels,centers = cv2.kmeans(data,1,None,criteria,10,flags)
+		# find the most dominant color in the frame
+		data = np.reshape(frame, (-1,3))
+		data = np.float32(data)
+		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+		flags = cv2.KMEANS_RANDOM_CENTERS
+		compactness,labels,centers = cv2.kmeans(data,1,None,criteria,10,flags)
 
-	# add the rgb values of the color together
-	color_list=centers[0].astype(np.int32).tolist()
-	colorsum=color_list[0]+color_list[1]+color_list[2]
-	
-	# calculate the midi value
-	unit_size=400/(float)(max_midi_note-min_midi_note)
-	value=(int)(colorsum/unit_size) + (max_midi_note-1)
-	
-	if scale_type != 0:
-		idx = (np.abs(notes-value)).argmin()
-		value = notes[idx]
+		# add the rgb values of the color together
+		color_list=centers[0].astype(np.int32).tolist()
+		colorsum=color_list[0]+color_list[1]+color_list[2]
+		
+		# calculate the midi value
+		unit_size=400/(float)(max_midi_note-min_midi_note)
+		value=(int)(colorsum/unit_size) + (max_midi_note-1)
+		
+		if scale_type != 0:
+			idx = (np.abs(notes-value)).argmin()
+			value = notes[idx]
 
-	# add info text to the frame
-	text='Dominant color is: bgr({})'.format(centers[0].astype(np.int32))
-	cv2.putText(frame, text, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 10 , 2)
-	text2='MIDI value is: {}'.format(value)
-	cv2.putText(frame, text2, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 10 , 2)
-	text3='Target scale is: {}'.format(args['scale'])
-	cv2.putText(frame, text3, (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 10 , 2)
+		# add info text to the frame
+		text='Dominant color is: bgr({})'.format(centers[0].astype(np.int32))
+		cv2.putText(frame, text, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 10 , 2)
+		text2='MIDI value is: {}'.format(value)
+		cv2.putText(frame, text2, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 10 , 2)
+		text3='Target scale is: {}'.format(args['scale'])
+		cv2.putText(frame, text3, (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 10 , 2)
 
-	# send the midi signal out
-	# with midiout:
-		# print("here")
-		# note_on = [0x90, value, 112] # channel 1, middle C, velocity 112
-		# note_off = [0x80, 60, 0]
-		# midiout.send_message(note_on)
-		# time.sleep(0.6)
-		# midiout.send_message(note_off)
-		# time.sleep(0.3)
-	# print(threading.active_count())
-	play_thread = midi_signal_thread(midiout, value)
-	play_thread.start()
-	# play_thread.join()
-	# process = multiprocessing.Process(target=thread_function, args=(midiout, value)) 
-	# process.start()
-	# play_thread.join()
+		if count%10==0: # don't make a new sound on each frame
+			play_thread = midi_signal_thread(midiout, value)
+			play_thread.start()
 
-	# display the resulting frame
-	cv2.imshow('frame', frame)
-	if cv2.waitKey(1) & 0xFF == ord('q'):
-		break
-	
+		# display the resulting frame
+		cv2.imshow('frame', frame)
+		if cv2.waitKey(1) & 0xFF == ord('q'):
+			break
+		
+		# add counter (to control the times where new signal threads are made)
+		count += 1
+
 # clean up before quiting
 midiout.close_port()
 del midiout
