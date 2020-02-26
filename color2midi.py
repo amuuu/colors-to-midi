@@ -6,8 +6,11 @@ import cv2
 import imutils
 import numpy as np
 import rtmidi
+import threading
+import multiprocessing 
 
 from util import *
+from signalthread import *
 
 # terminal input arguments
 ap = argparse.ArgumentParser()
@@ -44,8 +47,9 @@ vs.set(cv2.CAP_PROP_FPS, 25)
 # set up rtmidi library and ports
 midiout = rtmidi.MidiOut()
 available_ports = midiout.get_ports()
+print(available_ports)
 if available_ports:
-    midiout.open_port(0)
+    midiout.open_port(2)
 else:
     midiout.open_virtual_port("Virtual output")
 
@@ -70,11 +74,11 @@ while True:
 	colorsum=color_list[0]+color_list[1]+color_list[2]
 	
 	# calculate the midi value
-	if scale_type == 0:
-		unit_size=400/(float)(max_midi_note-min_midi_note)
-		value=(int)(colorsum/unit_size + (max_midi_note-1))
-	else:
-		idx = (np.abs(notes - colorsum)).argmin()
+	unit_size=400/(float)(max_midi_note-min_midi_note)
+	value=(int)(colorsum/unit_size) + (max_midi_note-1)
+	
+	if scale_type != 0:
+		idx = (np.abs(notes-value)).argmin()
 		value = notes[idx]
 
 	# add info text to the frame
@@ -86,20 +90,29 @@ while True:
 	cv2.putText(frame, text3, (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 10 , 2)
 
 	# send the midi signal out
-	with midiout:
-		note_on = [0x90, value, 112] # channel 1, middle C, velocity 112
+	# with midiout:
+		# print("here")
+		# note_on = [0x90, value, 112] # channel 1, middle C, velocity 112
 		# note_off = [0x80, 60, 0]
-		midiout.send_message(note_on)
-		# time.sleep(0.5)
+		# midiout.send_message(note_on)
+		# time.sleep(0.6)
 		# midiout.send_message(note_off)
-		# time.sleep(0.1)
+		# time.sleep(0.3)
+	# print(threading.active_count())
+	play_thread = midi_signal_thread(midiout, value)
+	play_thread.start()
+	# play_thread.join()
+	# process = multiprocessing.Process(target=thread_function, args=(midiout, value)) 
+	# process.start()
+	# play_thread.join()
 
 	# display the resulting frame
 	cv2.imshow('frame', frame)
 	if cv2.waitKey(1) & 0xFF == ord('q'):
 		break
-
+	
 # clean up before quiting
+midiout.close_port()
 del midiout
 vs.release()
 cv2.destroyAllWindows()

@@ -15,13 +15,15 @@ def compute_scale_notes(scale_name, scale_type):
     notes = []
     
     if scale_type == 1: # major
-        for i in (1, 7): #from c2 to c7 (6 octaves)
+        for i in range(1, 7): #from c2 to c7 (6 octaves)
             notes.extend([base_note, base_note+2, base_note+4, base_note+5, base_note+7, base_note+9, base_note+11])
             base_note += 12 # go one octave further
+            print('in for')
     
     if scale_type == 2: # minor
-        for i in (1, 7): #from c2 to c7 (6 octaves)
+        for i in range(1, 7): #from c2 to c7 (6 octaves)
             notes.extend([base_note, base_note+2, base_note+3, base_note+5, base_note+7, base_note+8, base_note+10])
             base_note += 12 # go one octave further
 
+    print(notes)
     return np.asarray(notes)
