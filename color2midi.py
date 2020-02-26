@@ -18,6 +18,8 @@ count = 0
 ap = argparse.ArgumentParser()
 ap.add_argument("-c", "--channel", required=False, default=1,
 	help="output midi channel")
+ap.add_argument("-p", "--port", required=False, default=2,
+	help="midi port inside the channel")
 ap.add_argument("-s", "--scale", default='none', required=False,
 	help="target scale to quantize the midi signals to.")
 args = vars(ap.parse_args())
@@ -51,7 +53,7 @@ midiout = rtmidi.MidiOut()
 available_ports = midiout.get_ports()
 print(available_ports)
 if available_ports:
-    midiout.open_port(2)
+    midiout.open_port(args['port'])
 else:
     midiout.open_virtual_port("Virtual output")
 
