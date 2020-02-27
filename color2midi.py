@@ -79,8 +79,8 @@ with midiout:
 		colorsum=color_list[0]+color_list[1]+color_list[2]
 		
 		# calculate the midi value
-		unit_size=400/(float)(max_midi_note-min_midi_note)
-		value=(int)(colorsum/unit_size) + (max_midi_note-1)
+		unit_size=400/(max_midi_note-min_midi_note)
+		value=(int)(colorsum/unit_size)+min_midi_note
 		
 		if scale_type != 0:
 			idx = (np.abs(notes-value)).argmin()
