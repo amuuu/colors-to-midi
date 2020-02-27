@@ -82,6 +82,7 @@ with midiout:
 		unit_size=400/(max_midi_note-min_midi_note)
 		value=(int)(colorsum/unit_size)+min_midi_note
 		
+		# quantize the value for minor/major scale
 		if scale_type != 0:
 			idx = (np.abs(notes-value)).argmin()
 			value = notes[idx]
